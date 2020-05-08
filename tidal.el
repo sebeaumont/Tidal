@@ -46,39 +46,25 @@
   "*tidal*"
   "*The name of the tidal process buffer (default=*tidal*).")
 
-(defvar tidal-interpreter
-  "ghci"
-  "*The haskell interpeter to use (default=ghci).")
+(defcustom tidal-interpreter "cabal"
+  "The haskell insterpreter."
+  :type 'string
+  :group 'tidal)
 
 (defvar tidal-interpreter-version
   (substring (shell-command-to-string (concat tidal-interpreter " --numeric-version")) 0 -1)
   "*The version of tidal interpreter as a string.")
 
-(defvar tidal-interpreter-arguments
-  ()
-  "*Arguments to the haskell interpreter (default=none).")
+(defcustom tidal-interpreter-arguments (list "repl")
+  "*Arguments to the haskell interpreter (default=none)."
+  :type '(repeat string)
+  :group 'tidal)
 
-(defvar tidal-boot-script-path
-  (let ((filepath
-         (cond
-          ((string-equal system-type "windows-nt")
-           '(("path" . "echo off && for /f %a in ('ghc-pkg latest tidal') do (for /f \"tokens=2\" %i in ('ghc-pkg describe %a ^| findstr data-dir') do (echo %i))")
-             ("separator" . "\\")
-             ))
-          ((or (string-equal system-type "darwin") (string-equal system-type "gnu/linux"))
-           '(("path" . "ghc-pkg field -f ~/.cabal/store/ghc-$(ghc --numeric-version)/package.db tidal data-dir")
-             ("separator" . "/")
-             ))
-          )
-         ))
-    (concat
-     (string-trim (cadr (split-string
-                         (shell-command-to-string (cdr (assoc "path" filepath))) ":")))
-     (cdr (assoc "separator" filepath))
-     "BootTidal.hs")
-    )
-  "*Full path to BootTidal.hs (inferred by introspecting ghc-pkg package db)."
-)
+(defcustom tidal-boot-script-path "BootTidal.hs"
+  "The tidal boot script (ghci :script file)."
+  :type 'file
+  :group 'tidal)
+
 
 (defvar tidal-literate-p
   t
@@ -144,7 +130,7 @@
   (if (comint-check-proc tidal-buffer)
       (let ((cs (tidal-chunk-string 64 (concat s "\n"))))
         (mapcar (lambda (c) (comint-send-string tidal-buffer c)) cs))
-    (error "no tidal process running?")))
+    (error "No tidal process running?")))
 
 (defun tidal-transform-and-store (f s)
   "Transform example text into compilable form."
@@ -170,7 +156,7 @@
 (defun tidal-run-line ()
   "Send the current line to the interpreter."
   (interactive)
-  ;(tidal-get-now)
+  ;;(tidal-get-now)
   (let* ((s (buffer-substring (line-beginning-position)
 			      (line-end-position)))
 	 (s* (if tidal-literate-p
@@ -347,6 +333,11 @@
   (tidal-send-string ":}")
   )
 
+(defun tidal-hush ()
+  "send hush as a single line"
+  (interactive)
+  (tidal-send-string "hush"))
+
 (defun tidal-run-region ()
   "Place the region in a do block and compile."
   (interactive)
@@ -381,63 +372,35 @@
   "Haskell Tidal keybindings."
   (define-key map [?\C-c ?\C-s] 'tidal-start-haskell)
   (define-key map [?\C-c ?\C-v] 'tidal-see-output)
-  (define-key map [?\C-c ?\C-q] 'tidal-quit-haskell)
-  (define-key map [?\C-c ?\C-c] 'tidal-run-line)
+  (define-key map [?\C-c ?\C-n] 'tidal-run-line)
+  (define-key map [?\C-c ?\C-q] 'tidal-hush)
   (define-key map [?\C-c ?\C-e] 'tidal-run-multiple-lines)
   (define-key map (kbd "<C-return>") 'tidal-run-multiple-lines)
   (define-key map [?\C-c ?\C-r] 'tidal-run-region)
   (define-key map [?\C-c ?\C-l] 'tidal-load-buffer)
   (define-key map [?\C-c ?\C-i] 'tidal-interrupt-haskell)
   (define-key map [?\C-c ?\C-m] 'tidal-run-main)
-  (define-key map [?\C-c ?\C-1] 'tidal-run-d1)
-  (define-key map [?\C-c ?\C-2] 'tidal-run-d2)
-  (define-key map [?\C-c ?\C-3] 'tidal-run-d3)
-  (define-key map [?\C-c ?\C-4] 'tidal-run-d4)
-  (define-key map [?\C-c ?\C-5] 'tidal-run-d5)
-  (define-key map [?\C-c ?\C-6] 'tidal-run-d6)
-  (define-key map [?\C-c ?\C-7] 'tidal-run-d7)
-  (define-key map [?\C-c ?\C-8] 'tidal-run-d8)
-  (define-key map [?\C-c ?\C-9] 'tidal-run-d9)
-  (define-key map [?\C-v ?\C-1] 'tidal-stop-d1)
-  (define-key map [?\C-v ?\C-2] 'tidal-stop-d2)
-  (define-key map [?\C-v ?\C-3] 'tidal-stop-d3)
-  (define-key map [?\C-v ?\C-4] 'tidal-stop-d4)
-  (define-key map [?\C-v ?\C-5] 'tidal-stop-d5)
-  (define-key map [?\C-v ?\C-6] 'tidal-stop-d6)
-  (define-key map [?\C-v ?\C-7] 'tidal-stop-d7)
-  (define-key map [?\C-v ?\C-8] 'tidal-stop-d8)
-  (define-key map [?\C-v ?\C-9] 'tidal-stop-d9))
+  ;;
+  (define-key map [?\C-c ?\C-a] 'tidal-run-d1)
+  (define-key map [?\C-c ?\C-b] 'tidal-run-d2)
+  (define-key map [?\C-c ?\C-j] 'tidal-run-d3)
+  (define-key map [?\C-c ?\C-d] 'tidal-run-d4)
+  (define-key map [?\C-c ?\C-e] 'tidal-run-d5)
+  (define-key map [?\C-c ?\C-f] 'tidal-run-d6)
+  (define-key map [?\C-c ?\C-g] 'tidal-run-d7)
+  (define-key map [?\C-c ?\C-h] 'tidal-run-d8)
+  (define-key map [?\C-c ?\C-i] 'tidal-run-d9)
+  ;;
+  (define-key map [?\C-v ?\C-a] 'tidal-stop-d1)
+  (define-key map [?\C-v ?\C-b] 'tidal-stop-d2)
+  (define-key map [?\C-v ?\C-j] 'tidal-stop-d3)
+  (define-key map [?\C-v ?\C-d] 'tidal-stop-d4)
+  (define-key map [?\C-v ?\C-e] 'tidal-stop-d5)
+  (define-key map [?\C-v ?\C-f] 'tidal-stop-d6)
+  (define-key map [?\C-v ?\C-g] 'tidal-stop-d7)
+  (define-key map [?\C-v ?\C-h] 'tidal-stop-d8)
+  (define-key map [?\C-v ?\C-i] 'tidal-stop-d9))
 
-(defun turn-on-tidal-keybindings ()
-  "Haskell Tidal keybindings in the local map."
-  (local-set-key [?\C-c ?\C-s] 'tidal-start-haskell)
-  (local-set-key [?\C-c ?\C-v] 'tidal-see-output)
-  (local-set-key [?\C-c ?\C-q] 'tidal-quit-haskell)
-  (local-set-key [?\C-c ?\C-c] 'tidal-run-line)
-  (local-set-key [?\C-c ?\C-e] 'tidal-run-multiple-lines)
-  (local-set-key (kbd "<C-return>") 'tidal-run-multiple-lines)
-  (local-set-key [?\C-c ?\C-r] 'tidal-run-region)
-  (local-set-key [?\C-c ?\C-l] 'tidal-load-buffer)
-  (local-set-key [?\C-c ?\C-i] 'tidal-interrupt-haskell)
-  (local-set-key [?\C-c ?\C-m] 'tidal-run-main)
-  (local-set-key [?\C-c ?\C-1] 'tidal-run-d1)
-  (local-set-key [?\C-c ?\C-2] 'tidal-run-d2)
-  (local-set-key [?\C-c ?\C-3] 'tidal-run-d3)
-  (local-set-key [?\C-c ?\C-4] 'tidal-run-d4)
-  (local-set-key [?\C-c ?\C-5] 'tidal-run-d5)
-  (local-set-key [?\C-c ?\C-6] 'tidal-run-d6)
-  (local-set-key [?\C-c ?\C-7] 'tidal-run-d7)
-  (local-set-key [?\C-c ?\C-8] 'tidal-run-d8)
-  (local-set-key [?\C-c ?\C-9] 'tidal-run-d9)
-  (local-set-key [?\C-v ?\C-1] 'tidal-stop-d1)
-  (local-set-key [?\C-v ?\C-2] 'tidal-stop-d2)
-  (local-set-key [?\C-v ?\C-3] 'tidal-stop-d3)
-  (local-set-key [?\C-v ?\C-4] 'tidal-stop-d4)
-  (local-set-key [?\C-v ?\C-5] 'tidal-stop-d5)
-  (local-set-key [?\C-v ?\C-6] 'tidal-stop-d6)
-  (local-set-key [?\C-v ?\C-7] 'tidal-stop-d7)
-  (local-set-key [?\C-v ?\C-8] 'tidal-stop-d8)
-  (local-set-key [?\C-v ?\C-9] 'tidal-stop-d9))
 
 (defun tidal-mode-menu (map)
   "Haskell Tidal menu."

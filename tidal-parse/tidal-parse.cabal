@@ -29,14 +29,14 @@ library
   other-modules: Sound.Tidal.Parse.TH
 
   Build-depends:
-      base >=4.8 && <5
-    , tidal >= 1.4.6
-    , transformers >= 0.5 && < 0.5.7
-    , template-haskell >= 2.10.0.0 && < 2.15
-    , haskell-src-exts >= 1.17.1 && < 1.23
-    , haskellish >= 0.2.0 && < 0.3
-    , containers < 0.7
-    , mtl >= 2.2.2 && <2.3
+      base
+    , tidal
+    , transformers
+    , template-haskell
+    , haskell-src-exts
+    , haskellish
+    , containers
+    , mtl
 
   if !impl(ghc >= 8.4.1)
     build-depends: semigroups >= 0.18 && < 0.20
@@ -49,9 +49,9 @@ test-suite tests
   ghc-options: -Wall
   other-modules: Sound.Tidal.TidalParseTest
   build-depends:
-                base ==4.*
-              , microspec >= 0.2.0.1
-              , containers < 0.7
+                base
+              , microspec
+              , containers
               , tidal-parse
               , tidal
 

@@ -3,8 +3,8 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans -fno-warn-unused-do-bind #-}
 
 module Sound.Tidal.ParseBP where
-
-import           Control.Applicative ((<$>), (<*>), pure)
+-- #if MIN_VERSION_base(4,8,0)
+--import           Control.Applicative ((<$>), (<*>), pure)
 import qualified Control.Exception as E
 import           Data.Colour
 import           Data.Colour.Names

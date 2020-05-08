@@ -1,1 +1,2 @@
-packages: ./ tidal-parse
+allow-newer: True
+packages: ./ tidal-parse ../hsound/hosc 

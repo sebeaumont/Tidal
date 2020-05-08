@@ -96,7 +96,7 @@ test-suite tests
 
 benchmark bench-speed
   type:             exitcode-stdio-1.0
-  main-is:          Main.hs 
+  main-is:          Main.hs
   hs-source-dirs:   bench/Speed
   other-modules: Tidal.PatternB
                  Tidal.CoreB
@@ -112,10 +112,10 @@ benchmark bench-speed
 
 benchmark bench-memory
   type:    exitcode-stdio-1.0
-  main-is: Main.hs 
-  hs-source-dirs: bench/Memory 
+  main-is: Main.hs
+  hs-source-dirs: bench/Memory
   other-modules: Tidal.UIB
-                 Tidal.Inputs 
+                 Tidal.Inputs
   build-depends:
                base
              , weigh

@@ -1,4 +1,4 @@
-module Sound.Tidal.Context (module C) where
+module Sound.Tidal (module C) where
 
 import Prelude hiding ((<*), (*>))
 
